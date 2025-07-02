@@ -74,7 +74,7 @@ def compress_gvas_to_sav(data: bytes, save_type: int) -> bytes:
     result = bytearray()
     result.extend(uncompressed_len.to_bytes(4, byteorder="little"))
     result.extend(compressed_len.to_bytes(4, byteorder="little"))
-    result.extend(MAGIC_BYTES)
+    result.extend(MAGIC_BYTES[0])
     result.extend(bytes([save_type]))
     result.extend(compressed_data)
 

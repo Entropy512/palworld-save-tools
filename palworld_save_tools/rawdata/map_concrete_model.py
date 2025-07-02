@@ -561,9 +561,10 @@ def decode_bytes(
             return {"values": m_bytes}
 
     if not reader.eof():
-        raise Exception(
+        print(
             f"Warning: EOF not reached for {object_id} {map_object_concrete_model}: ori: {''.join(f'{b:02x}' for b in m_bytes)} remaining: {reader.size - reader.data.tell()}"
         )
+        data["trailing_unparsed_data"] = [b for b in reader.read_to_end()]
     return data
 
 
@@ -688,7 +689,7 @@ def encode_bytes(p: Optional[dict[str, Any]]) -> bytes:
             writer.i64(p["extinction_date_time"])
             writer.write(bytes(p["trailing_bytes"]))
         case "PalMapObjectPalEggModel":
-            writer.u32(p["long_hold_interact_duration"])
+            writer.float(p["long_hold_interact_duration"])
         case "PalMapObjectBaseCampPoint":
             writer.write(bytes(p["leading_bytes"]))
             writer.guid(p["base_camp_id"])
@@ -726,5 +727,7 @@ def encode_bytes(p: Optional[dict[str, Any]]) -> bytes:
                 f"Unknown map object concrete model {map_object_concrete_model}"
             )
 
+    if "trailing_unparsed_data" in p:
+        writer.write(bytes(p["trailing_unparsed_data"]))
     encoded_bytes = writer.bytes()
     return encoded_bytes

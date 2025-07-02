@@ -129,10 +129,10 @@ def decode_bytes(
             data["transform"]["trailing_bytes"] = reader.byte_list(8)
 
     if not reader.eof():
-        raise Exception(
+        print(
             f"Warning: EOF not reached for {work_type}, remaining bytes: {reader.read_to_end()!r}"
         )
-
+        data["trailing_unparsed_data"] = [b for b in reader.read_to_end()]
     return data
 
 
@@ -256,6 +256,9 @@ def encode_bytes(p: dict[str, Any], work_type: str) -> bytes:
         case 2:
             writer.guid(p["transform"]["map_object_instance_id"])
             writer.write(bytes(p["transform"]["trailing_bytes"]))
+
+    if "trailing_unparsed_data" in p:
+        writer.write(bytes(p["trailing_unparsed_data"]))
 
     encoded_bytes = writer.bytes()
     return encoded_bytes
